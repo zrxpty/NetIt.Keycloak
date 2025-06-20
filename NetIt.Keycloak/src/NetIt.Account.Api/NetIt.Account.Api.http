@@ -1,0 +1,6 @@
+@NetIt.Account.Api_HostAddress = http://localhost:5074
+
+GET {{NetIt.Account.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
