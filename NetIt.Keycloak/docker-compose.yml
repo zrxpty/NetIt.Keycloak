@@ -16,10 +16,22 @@ services:
       KC_DB: postgres
       KC_DB_USERNAME:  ${POSTGRES_USER}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      
+      KK_TO_RMQ_URL: rabbitmq
+      KK_TO_RMQ_PORT: 5672
+      KK_TO_RMQ_VHOST: /
+      KK_TO_RMQ_EXCHANGE: amq.topic
+      KK_TO_RMQ_USERNAME: rabbit
+      KK_TO_RMQ_PASSWORD: rabbit
+      KK_TO_RMQ_USE_TLS: "false"
     depends_on:
       - keycloak_postgres
+      - rabbitmq
     networks:
       - keycloak-network
+    volumes:
+      - ./keycloak-plugin:/opt/keycloak/providers
+      - ./keycloak.conf:/opt/keycloak/conf/keycloak.conf
     command:
       - 'start-dev'
 
@@ -32,11 +44,25 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_PORT: 5432
+    ports:
+      - 5432:5432
     volumes:
       - ./data:/var/lib/postgresql/data
     networks:
       - keycloak-network
-
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: keycloak_rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"     # порт для приложений
+      - "15672:15672"   # веб-интерфейс RabbitMQ
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: rabbit
+    networks:
+      - keycloak-network
 
 networks:
   keycloak-network:
